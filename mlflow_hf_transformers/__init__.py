@@ -717,7 +717,8 @@ def load_tokenizer(tokenizer_uri):
         state_dict = mlflow.pytorch.load_state_dict(state_dict_uri)
     """
     import torch, transformers
+    from transformers import AutoTokenizer
 
     tokenizer_path = _download_artifact_from_uri(artifact_uri=tokenizer_uri)
 
-    return tokenizer.load(tokenizer_path)
+    return AutoTokenizer.from_pretrained(tokenizer_path)
