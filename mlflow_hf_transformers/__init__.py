@@ -618,6 +618,7 @@ def _load_model(path, model_class_name):
 
 
 def _str_import_module(name):
+    import transformers
     mod = getattr(transformers, name)
     return mod
 
