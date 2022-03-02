@@ -685,8 +685,7 @@ def save_tokenizer(tokenizer, path):
         ) from exc
     
     os.makedirs(path, exist_ok=True)
-    tokenizer_path = os.path.join(path, _TOKENIZER_DIR_SUBPATH)
-    tokenizer.save_pretrained(tokenizer_path)
+    tokenizer.save_pretrained(path)
 
 
 def load_tokenizer(tokenizer_uri):
@@ -718,19 +717,7 @@ def load_tokenizer(tokenizer_uri):
         state_dict = mlflow.pytorch.load_state_dict(state_dict_uri)
     """
     import torch, transformers
-    try:
-        tokenizer = getattr(transformers, tokenizer.__class__.__name__)
-    except ImportError as exc:
-        raise MlflowException(
-            message=(
-                "Failed to import the transformers tokenizer class for that tokenizer"
-                " tokenizer `{tok_class_name}` is not supported".format(
-                    tok_class_name=tokenizer.__class__.__name__
-                )
-            ),
-            error_code=RESOURCE_DOES_NOT_EXIST,
-        ) from exc
-    
+
     tokenizer_path = _download_artifact_from_uri(artifact_uri=tokenizer_uri)
 
     return tokenizer.load(tokenizer_path)
