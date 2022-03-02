@@ -345,7 +345,7 @@ def save_model(
 
     if not isinstance(model, transformers.PreTrainedModel):
         raise TypeError("Argument 'model' should be a transformers.PreTrainedModel")
-    
+    '''
     try:
         getattr(transformers, model.__class__.__name__)
     except ImportError as exc:
@@ -358,7 +358,7 @@ def save_model(
             ),
             error_code=RESOURCE_DOES_NOT_EXIST,
         ) from exc
-
+'''
     
     if code_paths is not None:
         if not isinstance(code_paths, list):
