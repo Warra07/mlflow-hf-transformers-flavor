@@ -26,20 +26,14 @@ from mlflow.models import Model, ModelSignature
 from mlflow.models.model import MLMODEL_FILE_NAME
 from mlflow.models.utils import ModelInputExample, _save_example
 from mlflow.protos.databricks_pb2 import RESOURCE_DOES_NOT_EXIST
-from mlflow.pytorch import pickle_module as mlflow_pytorch_pickle_module
 from mlflow.tracking.artifact_utils import _download_artifact_from_uri
-from mlflow.utils.annotations import experimental
 from mlflow.utils.environment import (
     _mlflow_conda_env,
     _validate_env_arguments,
-    _process_pip_requirements,
-    _process_conda_env,
     _CONDA_ENV_FILE_NAME,
     _REQUIREMENTS_FILE_NAME,
-    _CONSTRAINTS_FILE_NAME,
 )
 from mlflow.utils.requirements_utils import _get_pinned_requirement
-from mlflow.utils.docstring_utils import format_docstring, LOG_MODEL_PARAM_DOCS
 from mlflow.utils.file_utils import _copy_file_or_tree, TempDir, write_to
 from mlflow.utils.model_utils import _get_flavor_configuration
 from mlflow.tracking._model_registry import DEFAULT_AWAIT_MAX_SLEEP_SECONDS
@@ -71,9 +65,6 @@ def get_default_pip_requirements():
             [
                 "torch",
                 "transformers",
-                # We include CloudPickle in the default environment because
-                # it's required by the default pickle module used by `save_model()`
-                # and `log_model()`: `mlflow.pytorch.pickle_module`.
                 "cloudpickle",
             ],
         )
@@ -109,17 +100,7 @@ def get_default_conda_env():
                                              'cloudpickle==1.6.0']}]}
     """
     return _mlflow_conda_env(additional_pip_deps=get_default_pip_requirements())
-def get_default_conda_env(style):
-    """
-    :return: The default Conda environment for MLflow Models produced by calls to
-             :func:`save_model()` and :func:`log_model()`.
-    """
 
-    return _mlflow_conda_env(
-        additional_conda_deps=None,
-        additional_pip_deps=["altair==4.1.0", f"mlflow.styles.{style}"],
-        additional_conda_channels=None,
-    )
 
 
 def log_model(
@@ -212,7 +193,6 @@ def log_model(
         signature=signature,
         input_example=input_example,
         await_registration_for=await_registration_for,
-        requirements_file=requirements_file,
         extra_files=extra_files,
         pip_requirements=pip_requirements,
         extra_pip_requirements=extra_pip_requirements,
@@ -229,7 +209,6 @@ def save_model(
     code_paths=None,
     signature: ModelSignature = None,
     input_example: ModelInputExample = None,
-    requirements_file=None,
     extra_files=None,
     pip_requirements=None,
     extra_pip_requirements=None,
@@ -300,24 +279,6 @@ def save_model(
                 posixpath.join(path, _EXTRA_FILES_KEY),
             )
 
-    if requirements_file:
-
-        warnings.warn(
-            "`requirements_file` has been deprecated. Please use `pip_requirements` instead.",
-            FutureWarning,
-            stacklevel=2,
-        )
-
-        if not isinstance(requirements_file, str):
-            raise TypeError("Path to requirements file should be a string")
-
-        with TempDir() as tmp_requirements_dir:
-            _download_artifact_from_uri(
-                artifact_uri=requirements_file, output_path=tmp_requirements_dir.path()
-            )
-            rel_path = os.path.basename(requirements_file)
-            torchserve_artifacts_config[_REQUIREMENTS_FILE_KEY] = {"path": rel_path}
-            shutil.move(tmp_requirements_dir.path(rel_path), path)
 
     if code_paths is not None:
         code_dir_subpath = "code"
@@ -345,38 +306,20 @@ def save_model(
     )
     mlflow_model.save(os.path.join(path, MLMODEL_FILE_NAME))
 
+    conda_env_subpath = "conda.yaml"
 
     if conda_env is None:
-        if pip_requirements is None:
-            default_reqs = get_default_pip_requirements()
-            # To ensure `_load_pyfunc` can successfully load the model during the dependency
-            # inference, `mlflow_model.save` must be called beforehand to save an MLmodel file.
-            inferred_reqs = mlflow.models.infer_pip_requirements(
-                model_data_path,
-                FLAVOR_NAME,
-                fallback=default_reqs,
-            )
-            default_reqs = sorted(set(inferred_reqs).union(default_reqs))
-        else:
-            default_reqs = None
-        conda_env, pip_requirements, pip_constraints = _process_pip_requirements(
-            default_reqs,
-            pip_requirements,
-            extra_pip_requirements,
-        )
-    else:
-        conda_env, pip_requirements, pip_constraints = _process_conda_env(conda_env)
-
-    with open(os.path.join(path, _CONDA_ENV_FILE_NAME), "w") as f:
+        conda_env = get_default_conda_env()
+    elif not isinstance(conda_env, dict):
+        with open(conda_env, "r") as f:
+            conda_env = yaml.safe_load(f)
+    with open(os.path.join(path, conda_env_subpath), "w") as f:
         yaml.safe_dump(conda_env, stream=f, default_flow_style=False)
-
     # Save `constraints.txt` if necessary
-    if pip_constraints:
-        write_to(os.path.join(path, _CONSTRAINTS_FILE_NAME), "\n".join(pip_constraints))
 
-    if not requirements_file:
-        # Save `requirements.txt`
-        write_to(os.path.join(path, _REQUIREMENTS_FILE_NAME), "\n".join(pip_requirements))
+
+
+    write_to(os.path.join(path, _REQUIREMENTS_FILE_NAME), "\n".join(pip_requirements))
 
 
 
