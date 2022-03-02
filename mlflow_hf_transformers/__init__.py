@@ -45,7 +45,7 @@ from mlflow.utils.model_utils import _get_flavor_configuration
 from mlflow.tracking._model_registry import DEFAULT_AWAIT_MAX_SLEEP_SECONDS
 
 # Internal Libraries
-import . as mlflow_hf_transformers
+import mlflow_hf_transformers
 
 
 FLAVOR_NAME = "mlflow_hf_transformers"
