@@ -686,7 +686,7 @@ def save_tokenizer(tokenizer, path):
     
     os.makedirs(path, exist_ok=True)
     tokenizer_path = os.path.join(path, _TOKENIZER_DIR_SUBPATH)
-    tokenizer.save_prentrained(tokenizer_path)
+    tokenizer.save_pretrained(tokenizer_path)
 
 
 def load_tokenizer(tokenizer_uri):
