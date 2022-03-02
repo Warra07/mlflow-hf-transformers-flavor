@@ -345,20 +345,7 @@ def save_model(
 
     if not isinstance(model, transformers.PreTrainedModel):
         raise TypeError("Argument 'model' should be a transformers.PreTrainedModel")
-    '''
-    try:
-        getattr(transformers, model.__class__.__name__)
-    except ImportError as exc:
-        raise MlflowException(
-            message=(
-                "Failed to import the transformers model class for that model"
-                " model `{model_class_name}` is not supported".format(
-                    model_class_name=model.__class__.__name__
-                )
-            ),
-            error_code=RESOURCE_DOES_NOT_EXIST,
-        ) from exc
-'''
+
     
     if code_paths is not None:
         if not isinstance(code_paths, list):
