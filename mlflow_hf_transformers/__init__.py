@@ -654,7 +654,7 @@ def log_tokenizer(tokenizer, artifact_path):
     
     with TempDir() as tmp:
         local_path = tmp.path()
-        save_state_dict(tokenizer=tokenizer, path=local_path)
+        save_tokenizer(tokenizer=tokenizer, path=local_path)
         mlflow.log_artifacts(local_path, artifact_path)
 
 
