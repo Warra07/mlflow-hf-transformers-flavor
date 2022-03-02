@@ -304,6 +304,8 @@ def log_model(
 
         PyTorch logged models
     """
+    import transformers
+    
     return Model.log(
         artifact_path=artifact_path,
         flavor=mlflow_hf_transformers,
