@@ -347,7 +347,7 @@ def save_model(
         raise TypeError("Argument 'model' should be a transformers.PreTrainedModel")
     
     try:
-        _str_import_module(model.__class__.__name__)
+        getattr(transformers, model.__class__.__name__)
     except ImportError as exc:
         raise MlflowException(
             message=(
@@ -598,7 +598,7 @@ def _load_model(path, model_class_name):
     model_path = os.path.join(path, _MODEL_DIR_SUBPATH)
 
     try:
-     model_class = _str_import_module(model_class_name)
+     model_class = getattr(transformers, model_class_name)
     except ImportError as exc:
         raise MlflowException(
             message=(
@@ -613,14 +613,6 @@ def _load_model(path, model_class_name):
     return model_class.from_pretrained(model_path)
 
 
-
-
-
-
-def _str_import_module(name):
-    import transformers
-    mod = getattr(transformers, name)
-    return mod
 
 
 
@@ -657,8 +649,9 @@ def log_tokenizer(tokenizer, artifact_path):
             }
             mlflow.pytorch.log_state_dict(state_dict, artifact_path="checkpoint")
     """
+    import torch, transformers
     try:
-        _str_import_module(tokenizer.__class__.__name__)
+        getattr(transformers, tokenizer.__class__.__name__)
     except ImportError as exc:
         raise MlflowException(
             message=(
@@ -690,7 +683,7 @@ def save_tokenizer(tokenizer, path):
     # a model instead of a state_dict and `torch.save` (which accepts both model and state_dict)
     # successfully completes, leaving the user unaware of the mistake.
     try:
-        _str_import_module(tokenizer.__class__.__name__)
+        getattr(transformers, tokenizer.__class__.__name__)
     except ImportError as exc:
         raise MlflowException(
             message=(
@@ -737,7 +730,7 @@ def load_tokenizer(tokenizer_uri):
     """
     import torch, transformers
     try:
-        tokenizer = _str_import_module(tokenizer.__class__.__name__)
+        tokenizer = getattr(transformers, tokenizer.__class__.__name__)
     except ImportError as exc:
         raise MlflowException(
             message=(
