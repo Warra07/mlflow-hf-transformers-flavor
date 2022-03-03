@@ -1,11 +1,5 @@
 """
-The `mlflow_vismod` module provides an API for logging and loading Vega models. This module
-exports Vega models with the following flavors:
-
-Vega (native) format
-    This is the main flavor that can be loaded back into Vega.
-:py:mod:`mlflow.pyfunc`
-    Produced for use by generic pyfunc-based deployment tools and batch inference.
+The `mlflow_hf_transformers` module provides an API for logging and loading huggingface transformers models. 
 """
 # Standard Libraries
 import logging
