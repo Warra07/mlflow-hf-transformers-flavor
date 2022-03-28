@@ -428,7 +428,7 @@ def _load_model(path, model_class_name):
     if os.path.exists(tokenizer_path):
         tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
         return model, tokenizer
-    return model
+    return model, None
 
 
 
