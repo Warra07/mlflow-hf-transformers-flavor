@@ -13,7 +13,7 @@ import posixpath
 
 import mlflow
 import shutil
-import mlflow.pyfunc.utils as pyfunc_utils
+import mlflow.utils.model_utils as model_utils
 from mlflow import pyfunc
 from mlflow.exceptions import MlflowException
 from mlflow.models import Model, ModelSignature
@@ -371,7 +371,7 @@ def load_model(model_uri, dst_path=None):
         pyfunc_conf = {}
     code_subpath = pyfunc_conf.get(pyfunc.CODE)
     if code_subpath is not None:
-        pyfunc_utils._add_code_to_system_path(
+        model_utils._add_code_to_system_path(
             code_path=os.path.join(local_model_path, code_subpath)
         )
 
