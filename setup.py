@@ -3,9 +3,9 @@ from setuptools import setup
 setup(name='mlflow_hf_transformers',
       version='0.3',
       description='Mlflow flavors for pytorch huggingface transformers models',
-          install_requires=[
-        "mlflow>=1.11.0",
-        "transformers[torch]>=4.10.3",
+          extra_requires=[
+        "mlflow==2.2.2",
+        "transformers[torch]>=4.21.2",
     ],
       keywords='mlflow huggingface transformers',
       url='https://github.com/Warra07/mlflow-hf-transformers-flavor',
